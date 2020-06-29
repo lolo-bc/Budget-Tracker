@@ -111,7 +111,14 @@ function sendTransaction(isAdding) {
   populateChart();
   populateTable();
   populateTotal();
-  
+  const saveRecord = record => {
+    // create a transaction on the pending db with readwrite access
+    const transaction = db.transaction(['budget'], 'readwrite');
+    // access your pending object store
+    const budgetPending = transaction.objectStore('budget');
+    // add record to your store with add method.
+    budgetPending.add(record);
+  };
   // also send to server
   fetch("/api/transaction", {
     method: "POST",
