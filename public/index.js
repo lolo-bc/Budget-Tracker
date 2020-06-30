@@ -8,6 +8,7 @@ fetch("/api/transaction")
   .then(data => {
     // save db data on global variable
     transactions = data;
+    console.log(transactions);
 
     populateTotal();
     populateTable();
@@ -90,21 +91,13 @@ request.onerror = function(event) {
 
 request.onsuccess = event => {
   db = event.target.result;
-  if (navigator.onLine) {
-    checkDatabase();
-  }
 };
 
 request.onupgradeneeded = function(event) {
   var db = event.target.result;
 
-  // Create an objectStore to hold information about our customers. We're
-  // going to use "ssn" as our key path because it's guaranteed to be
-  // unique - or at least that's what I was told during the kickoff meeting.
-  var objectStore = db.createObjectStore('budget', { autoIncrement: true });
+  var objectStore = db.createObjectStore(dbName, { autoIncrement: true });
 
-  // Create an index to search customers by name. We may have duplicates
-  // so we can't use a unique index.
   objectStore.createIndex('pendingIndex', 'pending');
 
   // Use transaction oncomplete to make sure the objectStore creation is 
@@ -115,32 +108,22 @@ request.onupgradeneeded = function(event) {
   //     budgetObjectStore.add(record);
   // };
 };
-///////////////////////////OFFLINE CODE/////////////////////////////////////////////
-
 
 saveRecord = record => {
-  // create a transaction on the pending db with readwrite access
   const transaction = db.transaction(['budget'], 'readwrite');
-  // access your pending object store
-  const budgetPending = transaction.objectStore('budget');
-  // add record to your store with add method.
-  budgetPending.add(record);
-
-
+  const objectStore = transaction.objectStore('budget');
+  objectStore.add(record);
 };
 
-checkDatabase = () => {
-  // open a transaction on your pending db
- transaction = db.transaction(['budget'], 'readwrite');
-  // access your pending object store
-  const budgetPending = transaction.objectStore('budget');
+getOfflineStores = () => {
+  transaction = db.transaction(['budget'], 'readwrite');
+  const objectStore = transaction.objectStore('budget');
+  const getRequest = objectStore.getAll();
  
-  const getRequest = budgetPending.getAll();
- 
-  // access your pending object store
-  // get all records from store and set to a variable
+  
   getRequest.onsuccess = () => {
     if (getRequest.result.length > 0) {
+      console.log("YOO HOO BIG SUMMA BLOWOUT" + JSON.stringify(getRequest.result))
       fetch('/api/transaction/bulk', {
         method: 'POST',
         body: JSON.stringify(getRequest.result),
@@ -151,19 +134,16 @@ checkDatabase = () => {
       })
         .then(response => response.json())
         .then(() => {
-          // if successful, open a transaction on your pending db
           const transaction = db.transaction(['budget'], 'readwrite');
-          // access your pending object store
-          const budgetPending = transaction.objectStore('budget');
-          // clear all items in your store
-          budgetPending.clear();
+          const objectStore = transaction.objectStore('budget');
+          objectStore.clear();
         });
     }
   };
 };
 
 // listen for app coming back online
-window.addEventListener('online', checkDatabase);
+window.addEventListener('online', getOfflineStores);
 
 
 
