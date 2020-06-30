@@ -5,10 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "prestart": "npm run webpack",
     "lite-server": "lite-server",
-    "heroku-postbuild": "webpack -p",
-    "webpack": "webpack --watch"
+    "heroku-postbuild": "webpack -p"
   },
   "repository": {
     "type": "git",
