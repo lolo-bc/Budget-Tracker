@@ -141,30 +141,27 @@ checkDatabase = () => {
   // get all records from store and set to a variable
   getRequest.onsuccess = () => {
     if (getRequest.result.length > 0) {
-                budgetPending.clear();
-                sendTransaction(JSON.stringify(getRequest.result));
-
-    //   fetch('/api/transaction/bulk', {
-    //     method: 'POST',
-    //     body: JSON.stringify(getRequest.result),
-    //     headers: {
-    //       Accept: 'application/json, text/plain, */*',
-    //       'Content-Type': 'application/json'
-    //     }
-    //   })
-    //     .then(response => response.json())
-    //     .then(() => {
-    //       // if successful, open a transaction on your pending db
-    //       const transaction = db.transaction(['budget'], 'readwrite');
-    //       // access your pending object store
-    //       const budgetPending = transaction.objectStore('budget');
-    //       // clear all items in your store
-    //       budgetPending.clear();
-    //     });
-    // }
+      fetch('/api/transaction/bulk', {
+        method: 'POST',
+        body: JSON.stringify(getRequest.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(() => {
+          // if successful, open a transaction on your pending db
+          const transaction = db.transaction(['budget'], 'readwrite');
+          // access your pending object store
+          const budgetPending = transaction.objectStore('budget');
+          // clear all items in your store
+          budgetPending.clear();
+        });
+    }
   };
 };
-};
+
 // listen for app coming back online
 window.addEventListener('online', checkDatabase);
 
