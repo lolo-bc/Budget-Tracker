@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "lite-server": "lite-server",
-    "heroku-postbuild": "webpack -p"
+    "heroku-postbuild": "webpack -p",
+    "webpack": "webpack --watch"
   },
   "repository": {
     "type": "git",
