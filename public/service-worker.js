@@ -1,4 +1,4 @@
-const FILES_TO_CACHE = [ '/', '/index.html', '/index.js', "/dist/manifest.json",  "/dist/bundle.js", '/styles.css', '/dist/icon_192x192.317079d2f38bc5d2906f5408114bbcd3.png', '/icons/icon-192x192.png'];
+const FILES_TO_CACHE = [ '/', '/index.html',  "/dist/manifest.json",  "/dist/bundle.js", '/styles.css', '/dist/icon_192x192.317079d2f38bc5d2906f5408114bbcd3.png', '/icons/icon-192x192.png'];
 const CACHE_NAME = 'static-cache-v2';
 const DATA_CACHE_NAME = 'data-cache-v1';
 // install

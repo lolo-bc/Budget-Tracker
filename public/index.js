@@ -78,8 +78,6 @@ function populateChart() {
     }
   });
 }
-///////////////////////////OFFLINE CODE/////////////////////////////////////////////
-
 
 const dbName = "budget";
 
@@ -99,31 +97,21 @@ request.onupgradeneeded = function(event) {
   var objectStore = db.createObjectStore(dbName, { autoIncrement: true });
 
   objectStore.createIndex('pendingIndex', 'pending');
-
-  // Use transaction oncomplete to make sure the objectStore creation is 
-  // finished before adding data into it.
-  // objectStore.transaction.oncomplete = function(event) {
-  //   Store values in the newly created objectStore.
-  //   var budgetObjectStore = db.transaction('budget', "readwrite").objectStore("budget");
-  //     budgetObjectStore.add(record);
-  // };
 };
 
-saveRecord = record => {
-  const transaction = db.transaction(['budget'], 'readwrite');
-  const objectStore = transaction.objectStore('budget');
+saveRecord = (record) => {
+  const transaction = db.transaction([dbName], 'readwrite');
+  const objectStore = transaction.objectStore(dbName);
   objectStore.add(record);
 };
 
 getOfflineStores = () => {
-  transaction = db.transaction(['budget'], 'readwrite');
-  const objectStore = transaction.objectStore('budget');
+  const transaction = db.transaction([dbName], 'readwrite');
+  const objectStore = transaction.objectStore(dbName);
   const getRequest = objectStore.getAll();
- 
-  
   getRequest.onsuccess = () => {
     if (getRequest.result.length > 0) {
-      console.log("YOO HOO BIG SUMMA BLOWOUT" + JSON.stringify(getRequest.result))
+      console.log("offline transaction request" + JSON.stringify(getRequest.result))
       fetch('/api/transaction/bulk', {
         method: 'POST',
         body: JSON.stringify(getRequest.result),
@@ -134,20 +122,18 @@ getOfflineStores = () => {
       })
         .then(response => response.json())
         .then(() => {
-          const transaction = db.transaction(['budget'], 'readwrite');
-          const objectStore = transaction.objectStore('budget');
+          const transaction = db.transaction([dbName], 'readwrite');
+          const objectStore = transaction.objectStore(dbName);
           objectStore.clear();
         });
     }
   };
 };
 
-// listen for app coming back online
 window.addEventListener('online', getOfflineStores);
 
 
 
-///////////////////////////OFFLINE CODE/////////////////////////////////////////////
 
 
 function sendTransaction(isAdding) {
