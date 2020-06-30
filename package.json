@@ -4,11 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "lite-server": "lite-server",
-    "heroku-postbuild": "webpack -p",
-    "prestart": "npm run webpack",
-    "webpack": "webpack --watch"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
