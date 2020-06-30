@@ -77,23 +77,15 @@ function populateChart() {
     }
   });
 }
+///////////////////////////OFFLINE CODE/////////////////////////////////////////////
 
 
+const dbName = "budget";
 
+var request = indexedDB.open(dbName, 2);
 
-
-
-//create offline code here
-let db;
-
-// create request to store pending
-const request = window.indexedDB.open('budget', 1);
-
-request.onupgradeneeded = event => {
-  // create object store called "pending" and set autoIncrement to true
-  const db = event.target.result;
-  const budgetPending = db.createObjectStore('budget', { autoIncrement: true });
-  budgetPending.createIndex('pendingIndex', 'pending');
+request.onerror = function(event) {
+  console.log('Whoops indexddb error:', error);
 };
 
 request.onsuccess = event => {
@@ -103,10 +95,28 @@ request.onsuccess = event => {
   }
 };
 
-request.onerror = error => {
-  // log error here
-  console.log('ERROR:', error);
+request.onupgradeneeded = function(event) {
+  var db = event.target.result;
+
+  // Create an objectStore to hold information about our customers. We're
+  // going to use "ssn" as our key path because it's guaranteed to be
+  // unique - or at least that's what I was told during the kickoff meeting.
+  var objectStore = db.createObjectStore('budget', { autoIncrement: true });
+
+  // Create an index to search customers by name. We may have duplicates
+  // so we can't use a unique index.
+  objectStore.createIndex('pendingIndex', 'pending');
+
+  // Use transaction oncomplete to make sure the objectStore creation is 
+  // finished before adding data into it.
+  // objectStore.transaction.oncomplete = function(event) {
+  //   Store values in the newly created objectStore.
+  //   var budgetObjectStore = db.transaction('budget', "readwrite").objectStore("budget");
+  //     budgetObjectStore.add(record);
+  // };
 };
+///////////////////////////OFFLINE CODE/////////////////////////////////////////////
+
 
 saveRecord = record => {
   // create a transaction on the pending db with readwrite access
@@ -115,11 +125,13 @@ saveRecord = record => {
   const budgetPending = transaction.objectStore('budget');
   // add record to your store with add method.
   budgetPending.add(record);
+
+
 };
 
 checkDatabase = () => {
   // open a transaction on your pending db
-  const transaction = db.transaction(['budget'], 'readwrite');
+ transaction = db.transaction(['budget'], 'readwrite');
   // access your pending object store
   const budgetPending = transaction.objectStore('budget');
  
@@ -129,32 +141,36 @@ checkDatabase = () => {
   // get all records from store and set to a variable
   getRequest.onsuccess = () => {
     if (getRequest.result.length > 0) {
-      fetch('/api/transaction/bulk', {
-        method: 'POST',
-        body: JSON.stringify(getRequest.result),
-        headers: {
-          Accept: 'application/json, text/plain, */*',
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(response => response.json())
-        .then(() => {
-          // if successful, open a transaction on your pending db
-          const transaction = db.transaction(['budget'], 'readwrite');
-          // access your pending object store
-          const budgetPending = transaction.objectStore('budget');
-          // clear all items in your store
-          budgetPending.clear();
-        });
-    }
+                budgetPending.clear();
+                sendTransaction(JSON.stringify(getRequest.result));
+
+    //   fetch('/api/transaction/bulk', {
+    //     method: 'POST',
+    //     body: JSON.stringify(getRequest.result),
+    //     headers: {
+    //       Accept: 'application/json, text/plain, */*',
+    //       'Content-Type': 'application/json'
+    //     }
+    //   })
+    //     .then(response => response.json())
+    //     .then(() => {
+    //       // if successful, open a transaction on your pending db
+    //       const transaction = db.transaction(['budget'], 'readwrite');
+    //       // access your pending object store
+    //       const budgetPending = transaction.objectStore('budget');
+    //       // clear all items in your store
+    //       budgetPending.clear();
+    //     });
+    // }
   };
 };
-
+};
 // listen for app coming back online
 window.addEventListener('online', checkDatabase);
 
 
 
+///////////////////////////OFFLINE CODE/////////////////////////////////////////////
 
 
 function sendTransaction(isAdding) {
