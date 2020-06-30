@@ -11,7 +11,7 @@ const config = {
     filename: "bundle.js"
   },
 
-  mode: "development",
+  mode: "production",
   module: {
     rules: [{
       test: /\.m?js$/,
