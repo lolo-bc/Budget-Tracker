@@ -8,6 +8,7 @@
     "start": "node server.js",
     "lite-server": "lite-server",
     "build": "npm run webpack",
+    "heroku-postbuild": "webpack -p",
     "webpack": "webpack --watch"
   },
   "repository": {
