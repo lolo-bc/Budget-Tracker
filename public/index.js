@@ -72,7 +72,7 @@ function populateChart() {
         datasets: [{
             label: "Total Over Time",
             fill: true,
-            backgroundColor: "#6666ff",
+            backgroundColor: "#393862",
             data
         }]
     }
@@ -131,9 +131,6 @@ getOfflineStores = () => {
 };
 
 window.addEventListener('online', getOfflineStores);
-
-
-
 
 
 function sendTransaction(isAdding) {
